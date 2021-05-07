@@ -1,0 +1,213 @@
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+from modules.Portfolio import Portfolio
+from babel.numbers import format_currency, format_percent
+import plotly.express as px
+import dash_core_components as dcc
+
+tbic = Portfolio()
+df = tbic.gain_from_last_meeting()
+df.to_excel("LM.xlsx")
+df.groupby(['owner']).sum().to_excel("group.xlsx")
+df = df.apply(lambda x: True
+                  if x['cash_gain'] > 0 else False, axis =1)
+gain = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H5("Month to date:", className="card-title"),
+            html.P(
+                "Gain (loss) since last meeting: ",
+                className="card-text"
+            ),
+            html.H4(str(format_currency(tbic.gain_from_last_meeting()['cash_gain'].sum(), 'GBP', locale='en_US')), className="card-title text-right"),
+            html.P(
+                "Monthly performance: ",
+                className="card-text"
+            ),
+            html.H4(str(format_percent(100 * tbic.gain_from_last_meeting()['cash_gain'].sum() / tbic.gain_from_last_meeting()['gbp_position'].sum(), format='#.##', locale='en_US')) + "%", className="card-title text-right"),
+            html.P(
+                "Stocks Gained: ",
+                className="card-text"
+            ),
+            html.H4(len(df[df == True].index), className="card-title text-right"),
+            html.P(
+                "Stocks Declined: ",
+                className="card-text"
+            ),
+            html.H4(len(df[df == False].index), className="card-title text-right"),
+            dbc.Button(
+                "Click here", color="success", className="mt-auto"
+            ),
+        ]
+    )
+)
+stocks_cash = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H5("Portfolio Composition", className="card-title"),
+            html.P(
+                "Number of Stocks: ",
+                className="card-text"
+            ),
+            html.H4(str(tbic.gain_from_last_meeting().shape[0]), className="card-title text-right"),
+            html.P(
+                "Value of stocks: ",
+                className="card-text"
+            ),
+            html.H4(str(format_currency(tbic.gain_from_last_meeting()['gbp_value'].sum(), 'GBP', locale='en_US')), className="card-title text-right"),
+            html.P(
+                "Cash Position: ",
+                className="card-text"
+            ),
+            html.H4(str(format_currency(tbic.gbp_cash, 'GBP', locale='en_US')), className="card-title text-right"),
+            html.P(
+                "Total Value: ",
+                className="card-text"
+            ),
+            html.H4(str(
+                    format_currency(tbic.gbp_cash +  tbic.gain_from_last_meeting()['gbp_value'].sum(), 'GBP', locale='en_US')), className="card-title text-right"),
+            dbc.Button(
+                "Click here", color="success", className="mt-auto"
+            ),
+        ]
+    )
+)
+winners = dbc.Card (
+    dbc.CardBody(
+        [
+            html.H5("Biggest Sterling Gains", className="card-title"),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[0].split(' ')[0]).title() + ": " + format_currency((tbic.top_3_gainers()['cash_gain'].to_list()[0]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[1].split(' ')[0]).title() + ": " + format_currency(str(tbic.top_3_gainers()['cash_gain'].to_list()[1]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[2].split(' ')[0]).title() + ": " + format_currency(str(tbic.top_3_gainers()['cash_gain'].to_list()[2]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[3].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_gainers()['cash_gain'].to_list()[3]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[4].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_gainers()['cash_gain'].to_list()[4]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[5].split(' ')[0]).title() + ": " + format_currency(
+                    (tbic.top_3_gainers()['cash_gain'].to_list()[5]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[6].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_gainers()['cash_gain'].to_list()[6]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[7].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_gainers()['cash_gain'].to_list()[7]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[8].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_gainers()['cash_gain'].to_list()[8]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_gainers()['name'].to_list()[9].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_gainers()['cash_gain'].to_list()[9]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+        ]
+    ),
+    className="w-75"
+)
+losers = dbc.Card (
+    dbc.CardBody(
+        [
+            html.H5("Biggest Sterling Losses", className="card-title"),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[0].split(' ')[0]).title() + ": " + format_currency((tbic.top_3_losers()['cash_gain'].to_list()[0]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[1].split(' ')[0]).title() + ": " + format_currency(str(tbic.top_3_losers()['cash_gain'].to_list()[1]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[2].split(' ')[0]).title() + ": " + format_currency(str(tbic.top_3_losers()['cash_gain'].to_list()[2]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[3].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_losers()['cash_gain'].to_list()[3]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[4].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_losers()['cash_gain'].to_list()[4]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[5].split(' ')[0]).title() + ": " + format_currency(
+                    (tbic.top_3_losers()['cash_gain'].to_list()[5]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[6].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_losers()['cash_gain'].to_list()[6]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[7].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_losers()['cash_gain'].to_list()[7]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[8].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_losers()['cash_gain'].to_list()[8]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+            html.P(
+                str(tbic.top_3_losers()['name'].to_list()[9].split(' ')[0]).title() + ": " + format_currency(
+                    str(tbic.top_3_losers()['cash_gain'].to_list()[9]), 'GBP', locale='en_US'),
+                className="card-text"
+            ),
+
+        ]
+    ),
+    className="w-75"
+)
+owners = dbc.Card(
+    dbc.CardBody(
+        dcc.Graph(id='owner-pie', figure=px.pie(tbic.gain_from_last_meeting().groupby(['owner']).sum(), values='weight', names=tbic.gain_from_last_meeting().groupby(['owner']).sum().index))
+    )
+)
+currency = dbc.Card(
+    dbc.CardBody(
+        dcc.Graph(id='currency-pie', figure=px.pie(tbic.gain_from_last_meeting().groupby(['currency_x']).sum(), values='weight', names=tbic.gain_from_last_meeting().groupby(['currency_x']).sum().index))
+    )
+)
+sector = dbc.Card(
+    dbc.CardBody(
+        dcc.Graph(id='owner-pie', figure=px.pie(tbic.gain_from_last_meeting().groupby(['sector']).sum(), values='weight', names=tbic.gain_from_last_meeting().groupby(['sector']).sum().index))
+    )
+)
+style = dbc.Card(
+    dbc.CardBody(
+        dcc.Graph(id='owner-pie', figure=px.pie(tbic.gain_from_last_meeting().groupby(['stock_style']).sum(), values='weight', names=tbic.gain_from_last_meeting().groupby(['stock_style']).sum().index))
+    )
+)
+top_deck = dbc.CardDeck([stocks_cash, gain, winners, losers])
+bottom_deck = dbc.CardDeck([owners, currency, sector, style])
+layout = html.Div([
+    html.H3("Headline performance at a glance"),
+    dbc.Row([top_deck], justify='between'),
+    dbc.Row([bottom_deck], justify='between'),
+
+])
